@@ -1,0 +1,302 @@
+steps  followed 
+1.create database and tables here under models folder within  mysqlTable.js
+2.to connect our database server with node server we need a user 
+have access to databases.so give user a privillage.
+3.so to setup a node npm init then enter all necessary information like netry point app.js 
+becuse we will gonna run our node on it so all information will be stored on package json.
+4. so use get and listen method of express to check if our databse and node are connected and run
+5. if we use .env we need dotenv package to access and reqiuire first.
+2 methods of express 
+*GET : to retriev data from server and request paramaters are sent on url as querystring
+*POST : to submit data into server paramaters sento into request body not on urlS
+Router is mini express application used to organize our application.
+key conceps on Router
+ 1 we can define multiple Routers each handling different part of application 
+ 2 Routers can have middleware which will be applied to the routes defined in that router 
+ 3 Mouting : Routers can be mounted to specific paths meaning we can create nested routing structure
+ example  of creating and using Router:
+   1. set up express application 
+   const express = require('express');
+    const app = express();
+    const port = 3000;
+
+// Middleware to parse JSON bodies
+    app.use(express.json());
+
+// Listen on port
+    app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+    });
+    2.define Router 
+    const express = require('express');
+     const router = express.Router();
+
+// Define routes on the router
+   router.get('/users', (req, res) => {
+  res.send('Get all users');
+});
+
+router.post('/users', (req, res) => {
+  const newUser = req.body;
+  // Add user to the database (example)
+  res.send(`User ${newUser.name} added`);
+});
+
+router.get('/users/:id', (req, res) => {
+  const userId = req.params.id;
+  // Fetch user from the database (example)
+  res.send(`Get user with ID: ${userId}`);
+});
+
+// Export the router
+module.exports = router;
+ 3. Mount the Router on the main application 
+ const express = require('express');
+const app = express();
+const userRouter = require('./userRouter'); // Assuming userRouter is the file where router is defined
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Mount the router at /api path
+app.use('/api', userRouter);
+
+// Listen on port
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+For a larger application, we might have multiple routers, each responsible 
+for different parts of the API:
+example 
+// authRouter.js
+const express = require('express');
+const authRouter = express.Router();
+
+authRouter.post('/login', (req, res) => {
+  // Handle login
+  res.send('User logged in');
+});
+
+authRouter.post('/register', (req, res) => {
+  // Handle registration
+  res.send('User registered');
+});
+
+module.exports = authRouter;
+
+// productRouter.js
+const express = require('express');
+const productRouter = express.Router();
+
+productRouter.get('/', (req, res) => {
+  // Get all products
+  res.send('List of products');
+});
+
+productRouter.get('/:id', (req, res) => {
+  const productId = req.params.id;
+  // Get product by ID
+  res.send(`Product details for ID: ${productId}`);
+});
+
+module.exports = productRouter;
+
+// main application
+const express = require('express');
+const app = express();
+const authRouter = require('./authRouter');
+const productRouter = require('./productRouter');
+const port = 3000;
+
+app.use(express.json());
+
+app.use('/api/auth', authRouter);
+app.use('/api/products', productRouter);
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+
+to check the user part if it is worked using post man 
+by making post and the url:localhost:4000/api/user/register
+on body>>row>>json>> then put {"username":"kala",
+"firstname" : "kalid",
+"lastname":"kamil",
+"email":"kulibali@gmail.com",
+"password":"kkvandasss"}
+the response will be 
+{
+    "msg": "user created successfully",
+    "username": "kala",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImthbGEiLCJpZCI6MiwiaWF0IjoxNzE5MDkzNjExLCJleHAiOjE3MjE2ODU2MTF9.hKGu1aNp210LezY2yy4xLMXLG3JFIvWHn3J7OwmU7r8"
+}
+to check the login using post url:localhost:4000/api/user/login the put on the body>row>json 
+{
+"email":"kulibali@gmail.com",
+"password":"kkvandasss"}
+the response will be 
+{
+    "msg": "login successful",
+    "username": "kala",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImthbGEiLCJpZCI6MiwiaWF0IjoxNzE5MDk0MTg4LCJleHAiOjE3MjE2ODYxODh9.lJqDLgFO0Se62Uh7mRbBQExc06TKml-SF-0EltV8cdA"
+}
+to check user we use tokens why?
+beacuse we use token for authentication and secure commucication between client and server.
+for the authentication it used to authenticate users when they interact with protected resource or 
+endpoint of server.Instead of sending credentials (like username and password)
+ with every request, a token is issued to the client after successful authentication. 
+ This token serves as proof of the user's identity and permissions. 
+ so  on postman 
+ in check user using get url:localhost:4000/api/user/check
+ using  Authentication > Authtype = Bearer token 
+ then paste the token u get when u login into Token  then wwe will get 
+ {
+    "msg": "success",
+    "username": "kala"
+} 
+and i get jwt secret by generaing suing node by using the following code 
+by running the following scrypt 
+const crypto = require('crypto');
+const secret = crypto.randomBytes(64).toString('hex');
+console.log(secret);
+The connectionLimit in a MySQL connection pool defines how many connections can be open 
+and used simultaneously.
+example :magine you have a web application handling HTTP requests, and each request 
+requires a database connection.If 10 users access the application simultaneously, 
+and each request needs a database connection, the pool will provide connections to all 10 users.
+If an 11th user tries to access the application while the other 10 connections are still in use, 
+the 11th user's request will wait (be queued) until at least one of the current users' connections
+ is released.
+ //Question part
+ in the following code 
+ await db.query(
+      "insert into questions (questionid,title, description,userid) values (?, ?,?,?)",
+      [questionid, title, description, req.user.id]
+    );
+[questionid, title, description, req.user.id] this part indicates that the placehoder in values 
+are for this entries.
+the keyword await indicate that the code will gonna execute asynchronously,It pauses 
+the execution of the function until the database query completes.
+req.user.id: means  the ID of the user making the request,
+which is accessed from the req (request) object.
+In the context of a web application,like when using frameworks like Express.js for Node.js,
+req  is an object that represents the HTTP request and has properties for the request query string,
+parameters, body, HTTP headers and so on.
+req.user : used to store information about authenticated user , commonly we use it in authentication 
+middleware after verrifying the user identitiy using JWT or session.
+forexample
+// Assuming user authentication middleware :
+app.use((req, res, next) => {
+  // Example user object
+  req.user = {
+    id: '12345',
+    username: 'johndoe',
+    email: 'johndoe@example.com'
+  };
+  next();
+});
+next parameter is a function that you use in middleware to pass control to the next middleware 
+function in the stack.if next() is not called, the request will not proceed further in the middleware
+ chain.
+app.get('/profile', (req, res) => {
+  res.send(`Welcome, ${req.user.username}`);
+});
+so req.users is object contain detail about authenticated user.
+req.body :contain data submitted on the body of the request usually used with post,put,patch,delete requests 
+commonly used by body_parsing middleware such as body_parser or express.json().
+forexample:
+const express = require('express');
+const app = express();
+app.use(express.json()); // Middleware to parse JSON bodies
+
+app.post('/submit', (req, res) => {
+  const data = req.body;
+  console.log(data); // Logs the data sent in the request body
+  res.send('Data received');
+});
+app.use(express.json())
+The app.use(express.json()) line is used to parse incoming requests with JSON payloads. 
+It is a built-in middleware function in Express that parses incoming requests with JSON payloads 
+and is based on body-parser.Commonly used in APIs where the client sends data in JSON format.
+so its main purpuse is To automatically parse the JSON data in the body of incoming requests and 
+make it available under req.body. it doesnot mean used to parse the requested data into json format but 
+The app.use(express.json()) middleware is not used to parse data into JSON; instead, it is used
+to parse incoming request bodies that are already in JSON format into JavaScript objects. 
+This means that when a client sends a request with a JSON payload, this middleware will 
+automatically parse that JSON payload and make it available on req.body as a JavaScript object.
+for example if the client sends a request injson like 
+{
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+then after  we use app.use(express.json()) the requests will be availabe in the body in the form of 
+js objects so if we console req.body Outputs: { name: 'John Doe', email: 'john@example.com' }.
+to sum up :req.body is an object containing key-value pairs of data submitted in the request body,
+typically used for form submissions or API requests.
+req.params:contain route paramaters which are named segments of url , used by deefining route paths 
+using colon prefixed names then populated by frameworks when route is matched 
+forexample:
+const express = require('express');
+const app = express();
+
+app.get('/user/:id', (req, res) => {
+  const userId = req.params.id;
+  console.log(userId); // Logs the value of the id parameter
+  res.send(`User ID: ${userId}`);
+});
+in the above code define a route that handle get request to /user/:id 
+:id is route that captures value from url them make it available in req.params
+req.params.id: Accesses the value of the id parameter from the URL.
+so to sum up :req.params is an object containing properties mapped to the named route parameters, 
+which are extracted from the URL path when the route is matched.
+The difference between node.js and express.js is that
+ Node.js is a runtime environment that allows you to execute JavaScript code on the server side and
+  Built-in Modules: Provides built-in modules such as http, fs (file system), path, and others 
+  to perform various tasks without relying on external libraries.
+example:
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hello, World!\n');
+});
+
+server.listen(3000, '127.0.0.1', () => {
+  console.log('Server running at http://127.0.0.1:3000/');
+});
+Express.js is a web application framework for Node.js.
+It simplifies the process of building web applications and APIs by providing 
+a higher level of abstraction over the core Node.js modules.so designed to make it simpler process of 
+node.js activities and has features like Routing , Middleware so on 
+example :
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
+});
+
+app.listen(3000, () => {
+  console.log('Server running at http://127.0.0.1:3000/');
+});
+in the  following sql codes the need for join operation is 
+const allAnswersForQuestion = `
+SELECT username, answer FROM 
+    answers JOIN users 
+        ON
+    answers.userid = users.userid 
+    WHERE answers.questionid = ?`
+by a given questionid to provide all answers for it along with the user that provide the answer
+the following function takes two paramters 
+const createToken = (username, id) => {
+  const token = jwt.sign({ username, id }, process.env.JWT_SECRET, {
+    expiresIn: "30d",
+  });
+  return token;
+};
+jwt.sign is used to create new jsonwabetoken,The payload of the token is an object containing 
+the username and id. This data will be encoded into the token.
+Secret Key: process.env.JWT_SECRET is used as the secret key to sign the token
+expiresIn option is set to "30d", which means the token will expire in 30 days.

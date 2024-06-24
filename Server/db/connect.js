@@ -1,0 +1,23 @@
+const mysql2 = require("mysql2");
+
+const dbConnection = mysql2.createPool({
+  user: process.env.USER,
+  database: process.env.DATABASE,
+  password: process.env.PASSWORD,
+  host: "localhost",
+  connectionLimit: 10,
+});
+// dbConnection.execute("select 'test' " , (err,res)=>
+// {
+//   if (err)
+//     {
+
+//       console.log(err.message)
+//     }
+//     else{
+//       console.log(res)
+
+//     }
+// })
+
+module.exports = dbConnection.promise();
